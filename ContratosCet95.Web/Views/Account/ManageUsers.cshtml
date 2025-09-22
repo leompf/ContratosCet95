@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Manage Users";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<section class="box">
+    <h3>Manage User Accounts</h3>
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div class="row gtr-uniform gtr-25 ">
+
+        <div class="col-3">
+            <a asp-action="Register" class="button primary">Create new Users</a>
+        </div>
+
+        <div class="col-9">
+            <a asp-action="" class="button primary" style="margin-left: -35px;">View all Users</a>
+        </div>
+    </div>
+</section>
+

@@ -1,0 +1,47 @@
+﻿@model ContratosCet95.Web.Models.LoginViewModel;
+
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+
+<section class="box">
+    <h3>Login</h3>
+    <form method="post">
+        <div asp-validation-summary="ModelOnly"></div>
+
+        <div class="row gtr-uniform gtr-25 ">
+            <div class="col-12">
+                <h4><label asp-for="Username">Username</label></h4>
+                <input asp-for="Username" type="text" style="width:50%; margin-top:-10px;" />
+                <span asp-validation-for="Username" class="text-warning"></span>
+            </div>
+
+            <div class="col-12">
+                <h4><label asp-for="Password">Password</label></h4>
+                <input asp-for="Password" type="password" style="width:50%; margin-top:-10px;" />
+                <span asp-validation-for="Password" class="text-warning"></span>
+            </div>
+
+            <div class="col-6 col-12-mobilep">
+                <input asp-for="RememberMe" type="checkbox" id="RememberMe" />
+                <label asp-for="RememberMe">Remember Me?</label>
+                <span asp-validation-for="RememberMe" class="text-warning"></span>
+            </div>
+
+
+            <div class="col-12">
+                <input type="submit" value="Login" class="button" style="margin-top: 4px" />
+            </div>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

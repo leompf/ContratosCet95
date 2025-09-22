@@ -1,0 +1,72 @@
+﻿<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>Contratos</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <title>@ViewData["Title"] - Homepage</title>
+    <link rel="stylesheet" href="~/css/main.css" asp-append-version="true" />
+</head>
+<body class="landing is-preload">
+    <div id="page-wrapper">
+
+        <!-- Header -->
+        <header id="header" class="alt">
+            <h1><a asp-area="" asp-controller="Home" asp-action="Index">Contratos</a> by Leonardo Fraqueiro</h1>
+            <nav id="nav">
+                <ul>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <li><a asp-controller="Account" asp-action="Login" class="button">Sign In</a></li>
+                    }
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (User.IsInRole("Admin") && !"ManageUsers".Equals(ViewContext.RouteData.Values["Action"].ToString()))
+                        {
+                            <li><a asp-controller="Account" asp-action="ManageUsers" class="button">Manage Users</a></li>
+                        }                         
+                        <li><a asp-controller="Account" asp-action="Logout" class="button">Sign Out</a></li>
+                    }
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Banner -->
+        <section id="banner">
+            @if (IsSectionDefined("Banner") && !User.Identity.IsAuthenticated)
+            {
+                @RenderSection("Banner", required: false)
+            }
+        </section>
+
+        <!-- Main content -->
+        <section id="main" class="container">
+            @if (IsSectionDefined("About"))
+            {
+                @RenderSection("About", required: false)
+            }
+            @RenderBody()
+        </section>
+
+
+        <footer id="footer">
+            <ul class="icons">
+                <li><a href="https://github.com/leompf" class="icon brands fa-github"><span class="label">Github</span></a></li> 
+            </ul>
+            <ul class="copyright">
+                <li>&copy; Contratos. All rights reserved.</li>
+            </ul>
+        </footer>
+    </div>
+
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/jquery/jquery.dropotron.min.js"></script>
+    <script src="~/lib/jquery/jquery.scrollex.min.js"></script>
+    <script src="~/lib/jquery/browser.min.js"></script>
+    <script src="~/lib/jquery/breakpoints.min.js"></script>
+    <script src="~/lib/jquery/util.js"></script>
+    <script src="~/lib/jquery/main.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

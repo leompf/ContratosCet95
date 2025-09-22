@@ -1,8 +1,55 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using ContratosCet95.Web.Data.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> _userManager
+
+@{
+    var userLogged = await _userManager.GetUserAsync(User);
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@{
+    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+@if (!User.Identity.IsAuthenticated)
+{
+    @section Banner
+    {
+        <h2>Contratos</h2>
+        <p>Your platform of choice for managing contracts!</p>
+        <ul class="actions special">
+            <li><a asp-controller="Account" asp-action="Login" class="button primary">Sign In</a></li>
+            <li><a href="#" class="button primary">Learn More</a></li>
+        </ul>
+    }
+
+    @section About {
+        <section class="box special">
+            <header class="major">
+                <h2>
+                    Introducing the ultimate contract management platform
+                </h2>
+                <p>
+                    Want to have an overview of all your contracts? Want to know details about your favorite team? <br />
+                    You came to the right place!
+                </p>
+            </header>
+            <span class="image featured"><img src="~/images/pic01.jpg" alt="" /></span>
+        </section>
+    }
+}
+
+@if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+{
+    if (userLogged != null)
+    {
+        <section class="box special">
+            <h2>Hello, <a asp-controller="Account" asp-action="Profile">@userLogged.FirstName</a></h2>
+            <p>What will you do today?</p>
+            <ul class="actions special">
+                <li><a asp-controller="Account" asp-action="ManageUsers" class="button primary">Manage Users</a></li>
+                <li><a href="#" class="button primary">View Teams & Contracts</a></li>
+            </ul>
+        </section>
+    }
+}
