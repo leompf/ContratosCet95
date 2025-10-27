@@ -9,9 +9,9 @@ public interface IUserHelper
 {
     Task<User> GetUserByEmailAsync(string email);
 
-    Task<IdentityResult>AddUserAsync(User user, string password);
+    Task<IdentityResult> AddUserAsync(User user, string password);
 
-    Task<IdentityResult>UpdateUserAsync(User user);
+    Task<IdentityResult> UpdateUserAsync(User user);
 
     Task<SignInResult> LoginAsync(LoginViewModel model);
 
@@ -24,4 +24,6 @@ public interface IUserHelper
     Task<bool> IsUserInRoleAsync(User user, string roleName);
 
     IEnumerable<SelectListItem> GetComboUserRoles();
+
+    Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword);
 }

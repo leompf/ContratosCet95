@@ -18,11 +18,30 @@ public class UserHelper : IUserHelper
         _roleManager = roleManager;
     }
 
+
+    #region CRUD User
+    public async Task<User> GetUserByEmailAsync(string email)
+    {
+        return await _userManager.FindByEmailAsync(email);
+    }
+
     public async Task<IdentityResult> AddUserAsync(User user, string password)
     {
         return await _userManager.CreateAsync(user, password);
     }
 
+    public async Task<IdentityResult> UpdateUserAsync(User user)
+    {
+        return await _userManager.UpdateAsync(user);
+    }
+
+    public async Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword)
+    {
+        return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+    }
+    #endregion
+
+    #region CRUD Role
     public async Task AddUserToRoleAsync(User user, string roleName)
     {
         await _userManager.AddToRoleAsync(user, roleName);
@@ -41,33 +60,13 @@ public class UserHelper : IUserHelper
         }
     }
 
-    public IEnumerable<SelectListItem> GetComboUserRoles()
-    {
-        var list = _roleManager.Roles.Select(r => new SelectListItem
-        {
-            Text = r.Name,
-            Value = r.Id.ToString(),
-        }).ToList();
-
-        list.Insert(0, new SelectListItem
-        {
-            Text = "(Select a role...)",
-            Value = "0"
-        });
-        
-        return list;
-    }
-
-    public async Task<User> GetUserByEmailAsync(string email)
-    {
-        return await _userManager.FindByEmailAsync(email);
-    }
-
     public async Task<bool> IsUserInRoleAsync(User user, string roleName)
     {
         return await _userManager.IsInRoleAsync(user, roleName);
     }
+    #endregion
 
+    #region Authentication
     public async Task<SignInResult> LoginAsync(LoginViewModel model)
     {
         return await _signInManager.PasswordSignInAsync(
@@ -82,9 +81,24 @@ public class UserHelper : IUserHelper
     {
         await _signInManager.SignOutAsync();
     }
+    #endregion
 
-    public async Task<IdentityResult> UpdateUserAsync(User user)
+    #region Helper Methods
+    public IEnumerable<SelectListItem> GetComboUserRoles()
     {
-        return await _userManager.UpdateAsync(user);
+        var list = _roleManager.Roles.Select(r => new SelectListItem
+        {
+            Text = r.Name,
+            Value = r.Id,
+        }).ToList();
+
+        list.Insert(0, new SelectListItem
+        {
+            Text = "(Select a role...)",
+            Value = "0"
+        });
+
+        return list;
     }
+    #endregion
 }

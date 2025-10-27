@@ -4,6 +4,7 @@ using ContratosCet95.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace ContratosCet95.Web.Controllers;
 
@@ -18,7 +19,7 @@ public class AccountController : Controller
         _roleManager = roleManager;
     }
 
-
+    #region Authentication
     public IActionResult Login()
     {
         if (User.Identity.IsAuthenticated)
@@ -28,7 +29,6 @@ public class AccountController : Controller
 
         return View();
     }
-
 
     [HttpPost]
     public async Task<IActionResult> Login(LoginViewModel model)
@@ -46,20 +46,19 @@ public class AccountController : Controller
         return View(model);
     }
 
-
     public async Task<IActionResult> Logout()
     {
         await _userHelper.LogoutAsync();
         return RedirectToAction("Login", "Account");
     }
+    #endregion
 
-
+    #region User Creation
     [Authorize(Roles = "Admin")]
     public IActionResult ManageUsers()
     {
         return View();
     }
-
 
     [Authorize(Roles = "Admin")]
     public IActionResult Register()
@@ -72,36 +71,103 @@ public class AccountController : Controller
         return View(model);
     }
 
-    //TODO: Corrigir bug da combobox não identificar item selecionado
     [HttpPost]
     public async Task<IActionResult> Register(RegisterNewUserViewModel model)
     {
-        if (ModelState.IsValid)
+        model.Roles = _userHelper.GetComboUserRoles();
+
+        if (!ModelState.IsValid)
         {
-            var user = await _userHelper.GetUserByEmailAsync(model.Username);
+            return View(model);
+        }
 
-            if (user == null)
+        var user = await _userHelper.GetUserByEmailAsync(model.Username);
+        if (user != null)
+        {
+            ModelState.AddModelError(string.Empty, "A user with this email already exists.");
+            return View(model);
+        }
+
+        user = new User
+        {
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            Email = model.Username,
+            UserName = model.Username
+        };
+
+        //TODO: Gerar uma password random
+        var result = await _userHelper.AddUserAsync(user, model.Password);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
             {
-                user = new User
-                {
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    Email = model.Username,
-                    UserName = model.Username,
-                };
-
-                var result = await _userHelper.AddUserAsync(user, model.Password);                   
-
-                await _userHelper.AddUserToRoleAsync(user, model.RoleId.ToString());
-
-                if (result != IdentityResult.Success)
-                {
-                    ModelState.AddModelError(string.Empty, "The user could not be created.");
-                    return View(model);
-                }
+                ModelState.AddModelError(string.Empty, error.Description);
             }
+            return View(model);
+        }
+
+        var role = await _roleManager.FindByIdAsync(model.RoleId);
+
+        await _userHelper.AddUserToRoleAsync(user, role.Name);
+
+        model.StatusMessage = "User created successfully! Redirecting...";
+        return View(model);
+    }
+    #endregion
+
+    #region Account CRUD
+    [HttpGet]
+    public async Task<IActionResult> EditAccount()
+    {
+        var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var model = new AccountViewModel
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditAccount(AccountViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var user = await _userHelper.GetUserByEmailAsync(model.Email);
+        if (user == null)
+            return NotFound();
+
+        user.FirstName = model.FirstName;
+        user.LastName = model.LastName;
+        user.Email = model.Email;
+
+        var result = await _userHelper.UpdateUserAsync(user);
+
+        if (!string.IsNullOrEmpty(model.CurrentPassword) && !string.IsNullOrEmpty(model.NewPassword))
+        {
+            var passwordChangeResult = await _userHelper.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!passwordChangeResult.Succeeded)
+            {
+                foreach (var error in passwordChangeResult.Errors)
+                    ModelState.AddModelError("", error.Description);
+                return View(model);
+            }
+
+            ViewBag.PasswordMessage = "A tua palavra-passe foi alterada com sucesso!";
         }
 
         return View(model);
     }
+    #endregion
 }

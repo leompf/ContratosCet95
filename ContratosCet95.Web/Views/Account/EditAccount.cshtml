@@ -1,0 +1,79 @@
+﻿@model ContratosCet95.Web.Models.AccountViewModel
+
+@{
+    ViewData["Title"] = "EditAccount";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<form method="post" asp-controller="Account" asp-action="EditAccount">
+    <section class="box">
+        <h3>Account Details</h3>
+
+        <div class="row">
+            <div class="col-6">
+                <h4><label asp-for="FirstName">First Name</label></h4>
+                <input asp-for="FirstName" type="text" style="margin-top: -10px" />
+                <span asp-validation-for="FirstName"></span>
+            </div>
+
+            <div class="col-6">
+                <h4><label asp-for="LastName">Last Name</label></h4>
+                <input asp-for="LastName" type="text" style="margin-top: -10px" />
+                <span asp-validation-for="LastName"></span>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 10px">
+            <div class="col-6">
+                <h4><label asp-for="Email">Email</label></h4>
+                <input asp-for="Email" type="text" style="margin-top: -10px" />
+                <span asp-validation-for="Email"></span>
+            </div>
+
+            <div class="col-6">
+                <h4><label asp-for="Email">Birthdate</label></h4>
+                <input asp-for="Email" type="text" style="margin-top: -10px" />
+                <span asp-validation-for="Email"></span>
+            </div>
+        </div>
+
+        <button class="button special" type="submit" style="margin-top: 20px">Save</button>
+    </section>
+
+    <section class="box">
+        <h3>Change Password</h3>
+
+        <div class="row">
+            <div class="col-6">
+                <h4><label asp-for="CurrentPassword">Current Password</label></h4>
+                <input asp-for="CurrentPassword" type="password" style="margin-top: -10px" />
+                <span asp-validation-for="CurrentPassword"></span>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 10px">
+            <div class="col-6">
+                <h4><label asp-for="NewPassword">New Password</label></h4>
+                <input asp-for="NewPassword" type="password" style="margin-top: -10px" />
+                <span asp-validation-for="NewPassword"></span>
+            </div>
+
+            <div class="col-6">
+                <h4><label asp-for="ConfirmPassword">Confirm Password</label></h4>
+                <input asp-for="ConfirmPassword" type="password" style="margin-top: -10px" />
+                <span asp-validation-for="ConfirmPassword"></span>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <p>@Html.Raw(ViewBag.PasswordMessage)</p>
+        </div>
+
+        <div class="col-6">
+            <button class="button special" type="submit" style="margin-top: 20px">Save</button>
+        </div>
+    </section>
+
+
+</form>
+

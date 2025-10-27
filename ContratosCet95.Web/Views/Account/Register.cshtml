@@ -7,9 +7,19 @@
 
 <section class="box">
     <h3>Register new User</h3>
-    <form method="post">
-        <div asp-validation-summary="ModelOnly"></div>
 
+    @if (!string.IsNullOrEmpty(Model?.StatusMessage))
+    {
+        <div>@Model.StatusMessage</div>
+
+        <script>
+            setTimeout(function() {
+                window.location.href = '@Url.Action("ManageUsers", "Account")';
+            }, 3000);
+        </script>
+    }
+
+    <form method="post">
         <div class="row gtr-uniform gtr-25 ">
             <div class="col-12">
                 <h4><label asp-for="FirstName">First Name</label></h4>
@@ -29,6 +39,12 @@
                 <span asp-validation-for="Username"></span>
             </div>
 
+            <div class="col-6">
+                <h4><label asp-for="Birthdate">Birthdate</label></h4>
+                <input asp-for="Birthdate" type="date" style="width:50%; margin-top:-10px;" />
+                <span asp-validation-for="Birthdate"></span>
+            </div>
+
             <div class="col-12">
                 <h4><label asp-for="Password">Password</label></h4>
                 <input asp-for="Password" type="password" style="width:50%; margin-top:-10px;" />
@@ -45,6 +61,7 @@
                 <input type="submit" value="Create user" class="button" style="margin-top: 4px" />
             </div>
         </div>
+        <div asp-validation-summary="All"></div>
     </form>
 </section>
 

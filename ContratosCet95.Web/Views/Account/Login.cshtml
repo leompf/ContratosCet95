@@ -6,7 +6,6 @@
     Layout = "~/Views/Shared/_Layout2.cshtml";
 }
 
-
 <section class="box">
     <h3>Login</h3>
     <form method="post">
@@ -25,10 +24,14 @@
                 <span asp-validation-for="Password" class="text-warning"></span>
             </div>
 
-            <div class="col-6 col-12-mobilep">
+            <div class="col-3 col-12-mobilep">
                 <input asp-for="RememberMe" type="checkbox" id="RememberMe" />
                 <label asp-for="RememberMe">Remember Me?</label>
                 <span asp-validation-for="RememberMe" class="text-warning"></span>
+            </div>
+
+            <div class="col-6 col-12-mobilep">                 
+                <a asp-action="ForgotPassword">Forgot Password?</a>
             </div>
 
 

@@ -14,21 +14,7 @@
         <header id="header" class="alt">
             <h1><a asp-area="" asp-controller="Home" asp-action="Index">Contratos</a> by Leonardo Fraqueiro</h1>
             <nav id="nav">
-                <ul>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    @if (!User.Identity.IsAuthenticated)
-                    {
-                        <li><a asp-controller="Account" asp-action="Login" class="button">Sign In</a></li>
-                    }
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        @if (User.IsInRole("Admin") && !"ManageUsers".Equals(ViewContext.RouteData.Values["Action"].ToString()))
-                        {
-                            <li><a asp-controller="Account" asp-action="ManageUsers" class="button">Manage Users</a></li>
-                        }                         
-                        <li><a asp-controller="Account" asp-action="Logout" class="button">Sign Out</a></li>
-                    }
-                </ul>
+                @await Html.PartialAsync("_Menu")
             </nav>
         </header>
 
@@ -66,7 +52,8 @@
     <script src="~/lib/jquery/browser.min.js"></script>
     <script src="~/lib/jquery/breakpoints.min.js"></script>
     <script src="~/lib/jquery/util.js"></script>
-    <script src="~/lib/jquery/main.js"></script>
+    <script src="~/lib/jquery/main.js"></script>  
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
