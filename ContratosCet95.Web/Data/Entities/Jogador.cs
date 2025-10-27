@@ -18,6 +18,10 @@ namespace ContratosCet95.Web.Data.Entities
 
         [Required]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = false)]
-        public DateTime Birthdate { get; set; }
+        public DateOnly Birthdate { get; set; }
+
+
+        [Required]
+        public User User { get; set; } = null!;
     }
 }

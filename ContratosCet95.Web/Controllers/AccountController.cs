@@ -1,4 +1,5 @@
-﻿using ContratosCet95.Web.Data.Entities;
+﻿using ContratosCet95.Web.Data;
+using ContratosCet95.Web.Data.Entities;
 using ContratosCet95.Web.Helpers;
 using ContratosCet95.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -12,19 +13,25 @@ namespace ContratosCet95.Web.Controllers;
 public class AccountController : Controller
 {
     private readonly IUserHelper _userHelper;
+    private readonly IJogadorRepository _jogadorRepository;
     private readonly IEmailSender _emailSender;
     private readonly Password _password;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IConverterHelper _converterHelper;
 
     public AccountController(IUserHelper userHelper,
+        IJogadorRepository jogadorRepository,
         IEmailSender emailSender,
         Password password,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole> roleManager,
+        IConverterHelper converterHelper)
     {
         _userHelper = userHelper;
+        _jogadorRepository = jogadorRepository;
         _emailSender = emailSender;
         _password = password;
         _roleManager = roleManager;
+        _converterHelper = converterHelper;
     }
 
     #region Authentication
@@ -61,7 +68,7 @@ public class AccountController : Controller
     }
     #endregion
 
-    #region User Creation
+    #region Account Creation
     [Authorize(Roles = "Admin")]
     public IActionResult ManageUsers()
     {
@@ -103,6 +110,7 @@ public class AccountController : Controller
             LastName = model.LastName,
             Email = model.Username,
             UserName = model.Username,
+            Birthdate = model.Birthdate,
             IsChangePassword = true
         };
 
@@ -121,6 +129,12 @@ public class AccountController : Controller
 
         var role = await _roleManager.FindByIdAsync(model.RoleId);
         await _userHelper.AddUserToRoleAsync(user, role.Name);
+
+        var jogador = await _jogadorRepository.CreateJogadorAsync(user, "Jogador");
+        if (jogador != null)
+        {
+            await _jogadorRepository.CreateAsync(jogador);
+        }
 
         var token = await _userHelper.GenerateEmailConfirmationToken(user);
         var confirmationLink = Url.Action("ConfirmEmail", "Account", new
@@ -206,7 +220,7 @@ public class AccountController : Controller
 
         if (!string.IsNullOrEmpty(model.CurrentPassword) && !string.IsNullOrEmpty(model.NewPassword))
         {
-            var passwordChangeResult = await _userHelper.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);            
+            var passwordChangeResult = await _userHelper.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
 
             if (!passwordChangeResult.Succeeded)
             {
@@ -222,4 +236,42 @@ public class AccountController : Controller
         return View(model);
     }
     #endregion
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet]
+    public async Task<IActionResult> ViewAllUsers(string? name, string? email, string? role, string? sortBy, bool sortDescending = true)
+    {
+        var users = _userHelper.GetAllUsers();
+        var userList = new List<UserViewModel>();
+
+        foreach (var user in users)
+        {
+            var userRole = await _userHelper.GetUserRoleAsync(user);
+            userList.Add(_converterHelper.ToUserViewModel(user, userRole));
+        }
+
+        userList = _userHelper.FilterAndSortUsers(userList, name, email, role, sortBy, sortDescending);
+
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            var partialModel = new UserListViewModel
+            {
+                Users = userList
+            };
+            return PartialView("_ViewAllUsersTable", partialModel.Users);
+        }
+
+        var model = new UserListViewModel
+        {
+            NameFilter = name,
+            EmailFilter = email,
+            Users = userList,
+            Roles = _userHelper.GetAllRoles()
+        };
+
+        ViewBag.DefaultSortColumn = sortBy ?? "Name";
+        ViewBag.DefaultSortDescending = sortDescending;
+
+        return View(model);
+    }
 }

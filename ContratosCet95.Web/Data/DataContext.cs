@@ -6,8 +6,9 @@ namespace ContratosCet95.Web.Data;
 
 public class DataContext : IdentityDbContext<User>
 {
+    public DbSet<Jogador> Jogadores { get; set; }
 
     public DataContext(DbContextOptions<DataContext> options) : base(options)
-    {          
+    {           
     }
 }

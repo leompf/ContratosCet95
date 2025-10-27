@@ -16,5 +16,8 @@ public class User : IdentityUser
     public string LastName { get; set; } = null!;
 
 
+    [Required]
+    public DateOnly Birthdate { get; set; } 
+
     public bool IsChangePassword { get; set; }
 }

@@ -43,9 +43,12 @@ public class Program
 
         builder.Services.AddTransient<SeedDB>();
         builder.Services.AddScoped<IUserHelper, UserHelper>();
+        builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
         builder.Services.AddScoped<ChangePasswordResourceFilter>();
         builder.Services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddTransient<Password>();
+
+        builder.Services.AddScoped<IJogadorRepository, JogadorRepository>();
 
         var app = builder.Build();
 

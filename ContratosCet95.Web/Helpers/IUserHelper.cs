@@ -7,6 +7,7 @@ namespace ContratosCet95.Web.Helpers;
 
 public interface IUserHelper
 {
+    IQueryable<User> GetAllUsers();
     Task<User> GetUserByEmailAsync(string email);
 
     Task<IdentityResult> AddUserAsync(User user, string password);
@@ -23,7 +24,11 @@ public interface IUserHelper
 
     Task<bool> IsUserInRoleAsync(User user, string roleName);
 
+    Task<string> GetUserRoleAsync(User user);
+
     IEnumerable<SelectListItem> GetComboUserRoles();
+
+    IEnumerable<SelectListItem> GetAllRoles();
 
     Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword);
 
@@ -32,4 +37,6 @@ public interface IUserHelper
     Task<IdentityResult> ConfirmEmailAsync(User user, string token);
 
     Task<User> GetUserByIdAsync(string userId);
+
+    List<UserViewModel> FilterAndSortUsers(IEnumerable<UserViewModel> users, string? name, string? email, string? role, string? sortBy, bool sortDescending);
 }

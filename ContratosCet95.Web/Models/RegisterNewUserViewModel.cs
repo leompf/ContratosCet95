@@ -18,7 +18,7 @@ public class RegisterNewUserViewModel
 
     [Required]
     [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = false)]
-    public DateTime Birthdate { get; set; }
+    public DateOnly Birthdate { get; set; }
 
 
     [Required]

@@ -1,22 +1,27 @@
-﻿using ContratosCet95.Web.Data.Entities;
+﻿using ContratosCet95.Web.Data;
+using ContratosCet95.Web.Data.Entities;
 using ContratosCet95.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContratosCet95.Web.Helpers;
 
 public class UserHelper : IUserHelper
 {
+    private readonly DataContext _context;
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ILogger<UserHelper> _logger;
 
-    public UserHelper(UserManager<User> userManager, 
-        SignInManager<User> signInManager, 
+    public UserHelper(DataContext context,
+        UserManager<User> userManager,
+        SignInManager<User> signInManager,
         RoleManager<IdentityRole> roleManager,
         ILogger<UserHelper> logger)
     {
+        _context = context;
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
@@ -25,6 +30,15 @@ public class UserHelper : IUserHelper
 
 
     #region CRUD User
+    public IQueryable<User> GetAllUsers()
+    {
+        var users = _context.Users
+            .OrderBy(u => u.FirstName)
+            .AsQueryable();
+
+        return users;
+    }
+
     public async Task<User> GetUserByEmailAsync(string email)
     {
         return await _userManager.FindByEmailAsync(email);
@@ -52,6 +66,28 @@ public class UserHelper : IUserHelper
     #endregion
 
     #region CRUD Role
+    public IEnumerable<SelectListItem> GetAllRoles()
+    {
+        _logger.LogInformation("Fetching all roles from the database.");
+
+        try
+        {
+            var roles = _roleManager.Roles.ToList();
+            _logger.LogInformation("Successfully retrieved {RoleCount} roles.", roles.Count);
+
+            return roles.Select(r => new SelectListItem
+            {
+                Value = r.Name,
+                Text = r.Name
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while fetching roles.");
+            throw;
+        }
+    }
+
     public async Task AddUserToRoleAsync(User user, string roleName)
     {
         await _userManager.AddToRoleAsync(user, roleName);
@@ -73,6 +109,29 @@ public class UserHelper : IUserHelper
     public async Task<bool> IsUserInRoleAsync(User user, string roleName)
     {
         return await _userManager.IsInRoleAsync(user, roleName);
+    }
+
+    public async Task<string> GetUserRoleAsync(User user)
+    {
+        _logger.LogInformation("Fetching roles for user {UserId} ({Email})", user.Id, user.Email);
+
+        try
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault();
+
+            if (role != null)
+                _logger.LogInformation("User {UserId} is in role {RoleName}", user.Id, role);
+            else
+                _logger.LogWarning("User {UserId} does not have any roles assigned", user.Id);
+
+            return role!;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception while fetching roles for user {UserId}", user.Id);
+            throw;
+        }
     }
     #endregion
 
@@ -96,11 +155,13 @@ public class UserHelper : IUserHelper
     #region Helper Methods
     public IEnumerable<SelectListItem> GetComboUserRoles()
     {
-        var list = _roleManager.Roles.Select(r => new SelectListItem
-        {
-            Text = r.Name,
-            Value = r.Id,
-        }).ToList();
+        var list = _roleManager.Roles
+            .OrderBy(r => r.Name)
+            .Select(r => new SelectListItem
+            {
+                Text = r.Name,
+                Value = r.Id,
+            }).ToList();
 
         list.Insert(0, new SelectListItem
         {
@@ -137,6 +198,41 @@ public class UserHelper : IUserHelper
             _logger.LogError(ex, "Exception occurred while confirming email for user {UserId}", user.Id);
             throw;
         }
+    }
+
+    public List<UserViewModel> FilterAndSortUsers(IEnumerable<UserViewModel> users, string? name, string? email, string? role, string? sortBy, bool sortDescending)
+    {
+        _logger.LogInformation("Filtering users with Name='{Name}', Email='{Email}'",
+        name, email);
+
+        var filtered = users.ToList();
+
+        if (!string.IsNullOrEmpty(name))
+            filtered = filtered
+                .Where(u => !string.IsNullOrEmpty(u.Name) &&
+                            u.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        if (!string.IsNullOrEmpty(email))
+            filtered = filtered
+                .Where(u => !string.IsNullOrEmpty(u.Email) &&
+                            u.Email.Contains(email, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        filtered = (sortBy?.ToLower()) switch
+        {
+            "name" => sortDescending ? filtered.OrderByDescending(u => u.Name).ToList()
+                                     : filtered.OrderBy(u => u.Name).ToList(),
+            "email" => sortDescending ? filtered.OrderByDescending(u => u.Email).ToList()
+                                      : filtered.OrderBy(u => u.Email).ToList(),
+            "role" => sortDescending ? filtered.OrderByDescending(u => u.Role).ToList()
+                                     : filtered.OrderBy(u => u.Role).ToList(),
+            _ => sortDescending ? filtered.OrderByDescending(u => u.Name).ToList()
+                                : filtered.OrderBy(u => u.Name).ToList()
+        };
+
+        _logger.LogInformation("Filtered users count: {Count}", filtered.Count);
+        return filtered;
     }
     #endregion
 }

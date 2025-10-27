@@ -1,0 +1,12 @@
+﻿@model IEnumerable<ContratosCet95.Web.Models.UserViewModel>
+
+@foreach (var user in Model)
+{
+    <tr>
+        <td>@user.Name</td>
+        <td>@user.Email</td>
+        <td>@user.Role</td>
+        <td>@user.PhoneNumber</td>
+        <td>@user.Birthdate?.ToString("dd-MM-yyyy")</td>
+    </tr>
+}
