@@ -33,7 +33,9 @@ public class SeedDB
                 LastName = "Fraqueiro",
                 Email = "lmfraqueiro@gmail.com",
                 UserName = "lmfraqueiro@gmail.com",
-                PhoneNumber = "21111111"
+                PhoneNumber = "21111111",
+                IsChangePassword = false,
+                EmailConfirmed = true
             };
 
             var result = await _userHelper.AddUserAsync(user, "123456");

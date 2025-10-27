@@ -3,19 +3,27 @@ using ContratosCet95.Web.Helpers;
 using ContratosCet95.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+using PasswordGenerator;
 
 namespace ContratosCet95.Web.Controllers;
 
 public class AccountController : Controller
 {
     private readonly IUserHelper _userHelper;
+    private readonly IEmailSender _emailSender;
+    private readonly Password _password;
     private readonly RoleManager<IdentityRole> _roleManager;
 
-    public AccountController(IUserHelper userHelper, RoleManager<IdentityRole> roleManager)
+    public AccountController(IUserHelper userHelper,
+        IEmailSender emailSender,
+        Password password,
+        RoleManager<IdentityRole> roleManager)
     {
         _userHelper = userHelper;
+        _emailSender = emailSender;
+        _password = password;
         _roleManager = roleManager;
     }
 
@@ -72,6 +80,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterNewUserViewModel model)
     {
         model.Roles = _userHelper.GetComboUserRoles();
@@ -93,11 +102,13 @@ public class AccountController : Controller
             FirstName = model.FirstName,
             LastName = model.LastName,
             Email = model.Username,
-            UserName = model.Username
+            UserName = model.Username,
+            IsChangePassword = true
         };
 
-        //TODO: Gerar uma password random
-        var result = await _userHelper.AddUserAsync(user, model.Password);
+        var password = _password.LengthRequired(8).Next();
+
+        var result = await _userHelper.AddUserAsync(user, password);
 
         if (!result.Succeeded)
         {
@@ -109,11 +120,50 @@ public class AccountController : Controller
         }
 
         var role = await _roleManager.FindByIdAsync(model.RoleId);
-
         await _userHelper.AddUserToRoleAsync(user, role.Name);
+
+        var token = await _userHelper.GenerateEmailConfirmationToken(user);
+        var confirmationLink = Url.Action("ConfirmEmail", "Account", new
+        {
+            userId = user.Id,
+            token = token
+        }, protocol: HttpContext.Request.Scheme);
+
+        var mail = $@"<p>Hello {user.FirstName},</p>
+        <p>An account has been created for you in our platform. We bid you a warm welcome and hope you make great use of it! In here, you are able to view all your active or past contracts.<p>
+        <p>Your temporary password is: <b>{password}</b></p>
+        <p>You will be redirected to change your password the first time you login. You also must confirm your email address before attempting doing so by clicking <a href='{confirmationLink}'>here</a>.</p>
+        <p>Thank you for joining us,<br />
+        Best Regards<br />
+        Leonardo Fraqueiro</p>";
+
+        await _emailSender.SendEmailAsync(user.Email, "Account Creation - Contratos", mail);
 
         model.StatusMessage = "User created successfully! Redirecting...";
         return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ConfirmEmail(string userId, string token)
+    {
+        if (userId == null || token == null)
+        {
+            return View("ConfirmEmailFailure");
+        }
+
+        var user = await _userHelper.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            return View("ConfirmEmailFailure");
+        }
+
+        var result = await _userHelper.ConfirmEmailAsync(user, token);
+        if (result.Succeeded)
+        {
+            return View("ConfirmEmailSuccess");
+        }
+
+        return View("ConfirmEmailFailure");
     }
     #endregion
 
@@ -156,14 +206,16 @@ public class AccountController : Controller
 
         if (!string.IsNullOrEmpty(model.CurrentPassword) && !string.IsNullOrEmpty(model.NewPassword))
         {
-            var passwordChangeResult = await _userHelper.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            var passwordChangeResult = await _userHelper.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);            
+
             if (!passwordChangeResult.Succeeded)
             {
                 foreach (var error in passwordChangeResult.Errors)
                     ModelState.AddModelError("", error.Description);
                 return View(model);
             }
-
+            user.IsChangePassword = false;
+            await _userHelper.UpdateUserAsync(user);
             ViewBag.PasswordMessage = "A tua palavra-passe foi alterada com sucesso!";
         }
 

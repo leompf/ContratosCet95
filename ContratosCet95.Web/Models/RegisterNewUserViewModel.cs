@@ -8,12 +8,12 @@ public class RegisterNewUserViewModel
 {
     [Required]
     [Display(Name = "First Name")]
-    public string FirstName { get; set; }
+    public string FirstName { get; set; } = null!;
 
 
     [Required]
     [Display(Name = "Last Name")]
-    public string LastName { get; set; }
+    public string LastName { get; set; } = null!;
 
 
     [Required]
@@ -23,17 +23,12 @@ public class RegisterNewUserViewModel
 
     [Required]
     [DataType(DataType.EmailAddress)]
-    public string Username { get; set; }
-
-
-    [Required]
-    [MinLength(6)]
-    public string Password { get; set; }
+    public string Username { get; set; } = null!;
 
 
     [Required]
     [RegularExpression("^(?!0$).*", ErrorMessage = "You must select a role")]
-    public string RoleId { get; set; }
+    public string RoleId { get; set; } = null!;
 
 
     public IEnumerable<SelectListItem>? Roles { get; set; }

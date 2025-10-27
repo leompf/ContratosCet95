@@ -14,4 +14,7 @@ public class User : IdentityUser
     [Required]
     [Display(Name = "Last Name")]
     public string LastName { get; set; } = null!;
+
+
+    public bool IsChangePassword { get; set; }
 }

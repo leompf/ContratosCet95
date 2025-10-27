@@ -2,7 +2,10 @@ using ContratosCet95.Web.Data;
 using ContratosCet95.Web.Data.Entities;
 using ContratosCet95.Web.Helpers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using PasswordGenerator;
 
 namespace ContratosCet95.Web;
 
@@ -13,11 +16,15 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews(options =>
+        {
+            options.Filters.Add<ChangePasswordResourceFilter>();
+        });
 
         builder.Services.AddIdentity<User, IdentityRole>(cfg =>
         {
             cfg.User.RequireUniqueEmail = true;
+            cfg.SignIn.RequireConfirmedEmail = true;
             cfg.Password.RequireDigit = false;
             cfg.Password.RequiredUniqueChars = 0;
             cfg.Password.RequireLowercase = false;
@@ -25,7 +32,9 @@ public class Program
             cfg.Password.RequireNonAlphanumeric = false;
             cfg.Password.RequiredLength = 6;
         })
-            .AddEntityFrameworkStores<DataContext>();
+            .AddEntityFrameworkStores<DataContext>()
+            .AddDefaultTokenProviders();
+        
 
         builder.Services.AddDbContext<DataContext>( cfg => 
         {
@@ -34,6 +43,9 @@ public class Program
 
         builder.Services.AddTransient<SeedDB>();
         builder.Services.AddScoped<IUserHelper, UserHelper>();
+        builder.Services.AddScoped<ChangePasswordResourceFilter>();
+        builder.Services.AddTransient<IEmailSender, EmailSender>();
+        builder.Services.AddTransient<Password>();
 
         var app = builder.Build();
 

@@ -10,12 +10,17 @@ public class UserHelper : IUserHelper
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly ILogger<UserHelper> _logger;
 
-    public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
+    public UserHelper(UserManager<User> userManager, 
+        SignInManager<User> signInManager, 
+        RoleManager<IdentityRole> roleManager,
+        ILogger<UserHelper> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
+        _logger = logger;
     }
 
 
@@ -23,6 +28,11 @@ public class UserHelper : IUserHelper
     public async Task<User> GetUserByEmailAsync(string email)
     {
         return await _userManager.FindByEmailAsync(email);
+    }
+
+    public async Task<User> GetUserByIdAsync(string userId)
+    {
+        return await _userManager.FindByIdAsync(userId);
     }
 
     public async Task<IdentityResult> AddUserAsync(User user, string password)
@@ -99,6 +109,34 @@ public class UserHelper : IUserHelper
         });
 
         return list;
+    }
+
+    public async Task<string> GenerateEmailConfirmationToken(User user)
+    {
+        return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+    }
+
+    public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
+    {
+        _logger.LogInformation("Confirming email for user {UserId} ({Email})", user.Id, user.Email);
+
+        try
+        {
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (result.Succeeded)
+                _logger.LogInformation("Email confirmed successfully for user {UserId}", user.Id);
+            else
+                _logger.LogWarning("Email confirmation failed for user {UserId}. Errors: {Errors}",
+                    user.Id, string.Join(", ", result.Errors.Select(e => e.Description)));
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception occurred while confirming email for user {UserId}", user.Id);
+            throw;
+        }
     }
     #endregion
 }

@@ -46,12 +46,6 @@
             </div>
 
             <div class="col-12">
-                <h4><label asp-for="Password">Password</label></h4>
-                <input asp-for="Password" type="password" style="width:50%; margin-top:-10px;" />
-                <span asp-validation-for="Password"></span>
-            </div>
-
-            <div class="col-12">
                 <h4><label asp-for="RoleId">Role</label></h4>
                 <select asp-for="RoleId" asp-items="Model.Roles"></select>
                 <span asp-validation-for="RoleId"></span>

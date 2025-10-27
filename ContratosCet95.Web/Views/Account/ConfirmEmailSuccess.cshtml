@@ -1,0 +1,37 @@
+﻿
+@{
+    ViewData["Title"] = "ConfirmEmailSuccess";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<section id="main" class="container medium">
+    <header class="major" style="color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.4);">
+        <h2 style="font-size: 2.5rem; font-weight: 700; letter-spacing: 1px; color: #ffffff; margin-bottom: 0.5em;">
+            Account Activated Successfully
+        </h2>
+        <p style="font-size: 1.2rem; color: rgba(255,255,255,0.9); max-width: 600px; margin: 0 auto;">
+            Your account has been verified — welcome aboard!
+        </p>
+    </header>
+
+    <div class="box special text-center">
+        <span class="icon solid major fa-check-circle accent2"></span>
+
+        <h3>You're all set!</h3>
+        <p>
+            You can now log in using your temporary password.<br />
+            Please note that you’ll be prompted to change it upon your first login.
+        </p>
+
+        <form method="get">
+            <ul class="actions special">
+                <li>
+                    <button asp-action="Login" class="button primary icon solid fa-arrow-right">
+                        Login
+                    </button>
+                </li>
+            </ul>
+        </form>
+    </div>
+</section>
+

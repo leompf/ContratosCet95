@@ -26,4 +26,10 @@ public interface IUserHelper
     IEnumerable<SelectListItem> GetComboUserRoles();
 
     Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword);
+
+    Task<string> GenerateEmailConfirmationToken(User user);
+
+    Task<IdentityResult> ConfirmEmailAsync(User user, string token);
+
+    Task<User> GetUserByIdAsync(string userId);
 }
