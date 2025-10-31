@@ -8,6 +8,17 @@
 <section class="box">
     <h3>Create a new contract</h3>
 
+    @if (!string.IsNullOrEmpty(Model?.StatusMessage))
+    {
+        <div>@Model.StatusMessage</div>
+
+        <script>
+            setTimeout(function() {
+                window.location.href = '@Url.Action("Index", "Contracts")';
+            }, 3000);
+        </script>
+    }
+
     <form method="post">
         <div class="row gtr-uniform gtr-25 ">
             <div class="col-12">
@@ -17,21 +28,21 @@
             </div>
 
             <div class="col-6">
-                <h4><label asp-for="PlayerId">Player</label></h4>
-                <select asp-for="PlayerId" asp-items="Model.Players" style="margin-top: -10px"></select>
-                <span asp-validation-for="PlayerId"></span>
+                <h4><label asp-for="JogadorId">Player</label></h4>
+                <select asp-for="JogadorId" asp-items="Model.Players" style="margin-top: -10px"></select>
+                <span asp-validation-for="JogadorId"></span>
             </div>
 
             <div class="col-6">
-                <h4><label asp-for="TeamId">Team</label></h4>
-                <select asp-for="TeamId" asp-items="Model.Teams" style="margin-top: -10px"></select>
-                <span asp-validation-for="TeamId"></span>
+                <h4><label asp-for="EquipaId">Team</label></h4>
+                <select asp-for="EquipaId" asp-items="Model.Teams" style="margin-top: -10px"></select>
+                <span asp-validation-for="EquipaId"></span>
             </div>
 
             <div class="col-4">
-                <h4><label asp-for="TypeId">Type of Contract</label></h4>
-                <select asp-for="TypeId" asp-items="Model.Types" style="margin-top: -10px"></select>
-                <span asp-validation-for="TypeId"></span>
+                <h4><label asp-for="TipoContratoId">Type of Contract</label></h4>
+                <select asp-for="TipoContratoId" asp-items="Model.Types" style="margin-top: -10px"></select>
+                <span asp-validation-for="TipoContratoId"></span>
             </div>
 
             <div class="col-4" style="text-align: center">
@@ -48,7 +59,7 @@
 
             <div class="col-12">
                 <h4><label asp-for="Conditions">Conditions</label></h4>
-                <textarea id="mytextarea" style="margin-top: -10px"></textarea>
+                <textarea asp-for="Conditions" id="mytextarea" style="margin-top: -10px"></textarea>
             </div>
 
             <div class="col-12">
@@ -86,6 +97,34 @@
           ],
           ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
           uploadcare_public_key: 'ycrvizocq0mjp6nn87bfgj34q3grbnzs835ajxgutnz656zt',
+        });
+
+                document.addEventListener("DOMContentLoaded", function () {
+            const typeSelect = document.querySelector("select[name='TipoContratoId']");
+            const startDateInput = document.querySelector("input[name='StartDate']");
+            const endDateInput = document.querySelector("input[name='EndDate']");
+
+            async function updateEndDate() {
+                const typeId = typeSelect.value;
+                const startDate = startDateInput.value;
+
+                if (!typeId || !startDate) return;
+
+                try {
+                    const response = await fetch(`/api/contracts/get-end-date?typeId=${typeId}&startDate=${startDate}`);
+                    if (!response.ok) throw new Error("Failed to fetch");
+
+                    const data = await response.json();
+                    if (data.endDate) {
+                        endDateInput.value = data.endDate;
+                    }
+                } catch (err) {
+                    console.error("Error calculating end date:", err);
+                }
+            }
+
+            typeSelect.addEventListener("change", updateEndDate);
+            startDateInput.addEventListener("change", updateEndDate);
         });
     </script>
 }

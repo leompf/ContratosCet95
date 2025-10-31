@@ -1,0 +1,198 @@
+﻿@model ContratosCet95.Web.Models.ContractListViewModel
+
+@{
+    ViewData["Title"] = "ViewAllContracts";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<section id="main" class="container">
+    <header class="major">
+        <h2 style="color: white">All Contracts</h2>
+        <p style="color: white">Manage and view all contracts</p>
+    </header>
+
+    <div class="box mb-4">
+        <form id="filterForm" method="get" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" asp-for="NameFilter" placeholder="Name" value="@Model.NameFilter" class="alpha-input" />
+            </div>
+            <div class="col-md-3">
+                <input type="text" asp-for="PlayerFilter" placeholder="Player" value="@Model.PlayerFilter" class="alpha-input" />
+            </div>
+            <div class="col-md-3">
+                <input type="text" asp-for="TeamFilter" placeholder="Team" value="@Model.TeamFilter" class="alpha-input" />
+            </div>
+            <div class="col-md-3">
+                <input type="text" asp-for="TypeFilter" placeholder="Team" value="@Model.TypeFilter" class="alpha-input" />
+            </div>
+            <div class="col-md-3">
+                <input type="date" asp-for="StartDateFilter" placeholder="StartDate" value="@Model.StartDateFilter" class="alpha-input" />
+            </div>
+            <div class="col-md-3">
+                <input type="date" asp-for="EndDateFilter" placeholder="EndDate" value="@Model.EndDateFilter" class="alpha-input" />
+            </div>
+            <div class="col-md-3 d-flex flex-wrap gap-2">
+                <input type="submit" value="Filter" class="button primary" />
+                <a asp-action="ViewAllContracts" class="button alt">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="box">
+        <table class="table-wrapper">
+            <thead>
+                <tr>
+                    <th><a href="#" class="sortable" data-sort="Name"><span>Name</span> <i class="sort-icon"></i></a></th>
+                    <th><a href="#" class="sortable" data-sort="Player"><span>Player</span> <i class="sort-icon"></i></a></th>
+                    <th><a href="#" class="sortable" data-sort="Team"><span>Team</span> <i class="sort-icon"></i></a></th>
+                    <th><a href="#" class="sortable" data-sort="StartDate"><span>Start Date</span> <i class="sort-icon"></i></a></th>
+                    <th><a href="#" class="sortable" data-sort="EndDate"><span>End Date</span> <i class="sort-icon"></i></a></th>
+                    <th><a><span>Actions</span></a></th>
+                </tr>
+            </thead>
+            <tbody id="contracts-table-body">
+                @await Html.PartialAsync("_ViewAllContractsTable", Model.Contracts)
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div id="deleteModal" class="modal" style="display:none;">
+    <div class="modal-content box" style="max-width: 400px; margin: auto;">
+        <h3>Confirm Delete</h3>
+        <p>Are you sure you want to delete this team?</p>
+        <div class="actions" style="display:flex; justify-content: space-between; margin-top:20px;">
+            <button id="confirmDelete" class="button primary">Yes, delete</button>
+            <button id="cancelDelete" class="button alt">Cancel</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let currentSortColumn = '@ViewBag.DefaultSortColumn';
+            let currentSortState = '@(ViewBag.DefaultSortDescending ? "desc" : "asc")';
+            let typingTimer;
+            const debounceDelay = 0;
+
+            function updateSortIcons() {
+                $(".sortable").each(function () {
+                    const col = $(this).data("sort");
+                    const icon = $(this).find(".sort-icon");
+
+                    $(this).removeClass("active-sort");
+                    icon.removeClass("fa-sort-up fa-sort-down fa-sort text-muted");
+
+                    if (col === currentSortColumn) {
+                        $(this).addClass("active-sort");
+                        icon.addClass(currentSortState === "asc" ? "fa fa-sort-up" : "fa fa-sort-down");
+                    }
+                    else {
+                        icon.addClass("fa fa-sort text-muted");
+                    }
+                });
+            }
+
+            updateSortIcons();
+
+            function getFilters() {
+                return {
+                    name: $("#NameFilter").val(),
+                    player: $("#PlayerFilter").val(),
+                    team: $("#TeamFilter").val(),
+                    type: $("#TypeFilter").val(),
+                    startdate: $("#StartDateFilter").val(),
+                    enddate: $("#EndDateFilter").val(),
+                };
+            }
+
+            function loadContracts() {
+                const filters = getFilters();
+                $.ajax({
+                    url: '@Url.Action("ViewAllContracts", "Contracts")',
+                    type: 'GET',
+                    data: {
+                        ...filters,
+                        sortBy: currentSortColumn,
+                        sortDescending: currentSortState === "desc"
+                    },
+                    success: function (result) {
+                        $("#contracts-table-body").html(result);
+                        updateSortIcons();
+                    },
+                    error: function () {
+                        alert("Erro ao carregar os dados.");
+                    }
+                });
+            }
+
+            $(document).on("click", ".sortable", function (e) {
+                e.preventDefault();
+                const sortBy = $(this).data("sort");
+
+                if (currentSortColumn === sortBy) {
+                    currentSortState = currentSortState === "desc" ? "asc" : "desc";
+                }
+                else
+                {
+                    currentSortColumn = sortBy;
+                    currentSortState = "desc";
+                }
+
+                loadContracts();
+            });
+
+            $("#NameFilter, #PlayerFilter, #TeamFilter, #TypeFilter").on("keyup", function () {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(loadContracts, debounceDelay);
+            });
+
+            $("#NameFilter, #PlayerFilter, #TeamFilter, #TypeFilter").on("change", loadContracts);
+
+            $("form").on("submit", function (e) {
+                e.preventDefault();
+                loadContracts();
+            });
+
+            let selectedTeamId = null;
+
+            // Show modal
+            $(document).on('click', '.btn-delete', function () {
+                selectedTeamId = $(this).data('id');
+                $("#deleteModal").fadeIn(200);
+            });
+
+            // Cancel delete
+            $("#cancelDelete").on('click', function () {
+                selectedTeamId = null;
+                $("#deleteModal").fadeOut(200);
+            });
+
+            // Confirm delete
+            $("#confirmDelete").on('click', function () {
+                if (!selectedTeamId) return;
+
+                $.ajax({
+                    url: '@Url.Action("Delete", "Teams")/' + selectedTeamId,
+                    type: 'POST',
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function () {
+                        $('tr[data-team-id="' + selectedTeamId + '"]').fadeOut(300, function () {
+                            $(this).remove();
+                        });
+                        $("#deleteModal").fadeOut(200);
+                    },
+                    error: function () {
+                        alert("An error occurred while deleting the team.");
+                        $("#deleteModal").fadeOut(200);
+                    }
+                });
+            });
+        });
+    </script>
+    @Html.AntiForgeryToken()
+}
+

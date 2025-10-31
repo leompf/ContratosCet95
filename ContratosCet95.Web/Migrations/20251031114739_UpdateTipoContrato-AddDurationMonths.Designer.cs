@@ -4,6 +4,7 @@ using ContratosCet95.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContratosCet95.Web.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20251031114739_UpdateTipoContrato-AddDurationMonths")]
+    partial class UpdateTipoContratoAddDurationMonths
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,14 +46,16 @@ namespace ContratosCet95.Web.Migrations
                     b.Property<int>("JogadorId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
-                    b.Property<int>("TipoContratoId")
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -59,7 +64,7 @@ namespace ContratosCet95.Web.Migrations
 
                     b.HasIndex("JogadorId");
 
-                    b.HasIndex("TipoContratoId");
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Contratos");
                 });
@@ -360,9 +365,9 @@ namespace ContratosCet95.Web.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContratosCet95.Web.Data.Entities.TipoContrato", "TipoContrato")
+                    b.HasOne("ContratosCet95.Web.Data.Entities.TipoContrato", "Type")
                         .WithMany()
-                        .HasForeignKey("TipoContratoId")
+                        .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -370,7 +375,7 @@ namespace ContratosCet95.Web.Migrations
 
                     b.Navigation("Jogador");
 
-                    b.Navigation("TipoContrato");
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("ContratosCet95.Web.Data.Entities.Jogador", b =>

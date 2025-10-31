@@ -1,0 +1,17 @@
+﻿@model IEnumerable<ContratosCet95.Web.Data.Entities.Contrato>
+
+@foreach (var contract in Model)
+{
+    <tr data-team-id="@contract.Id">
+        <td>@contract.Name</td>
+        <td>@contract.Jogador.FullName</td>
+        <td>@contract.Equipa.Name</td>
+        <td>@contract.StartDate</td>
+        <td>@contract.EndDate</td>
+        <td>
+            <a asp-controller="Contracts" asp-action="Details" asp-route-id="@contract.Id">Details</a> |
+            <a asp-controller="Contracts" asp-action="Edit" asp-route-id="@contract.Id">Edit</a> |
+            <button type="button" class="button small danger btn-delete" data-id="@contract.Id">Delete</button>
+        </td>
+    </tr>
+}

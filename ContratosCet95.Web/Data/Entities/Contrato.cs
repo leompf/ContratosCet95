@@ -7,15 +7,19 @@ public class Contrato : IEntity
     public int Id { get; set; }
 
     [Required]
-    public int PlayerId { get; set; }
+    public string Name { get; set; } = null!;
+
+    [Required]
+    public int JogadorId { get; set; }
     public Jogador Jogador { get; set; } = null!;
 
     [Required]
-    public int TeamId { get; set; }
+    public int EquipaId { get; set; }
     public Equipa Equipa { get; set; } = null!;
 
     [Required]
-    public TipoContrato Type { get; set; } = null!;
+    public int TipoContratoId { get; set; }
+    public TipoContrato TipoContrato { get; set; } = null!;
 
     [Required]
     [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]

@@ -8,4 +8,8 @@ public class TipoContrato : IEntity
 
     [Required]
     public string Type { get; set; } = null!;
+
+    [Required]
+    [Range(1, 120, ErrorMessage = "Duration must be between 1 and 120 months.")]
+    public int DurationMonths { get; set; } 
 }

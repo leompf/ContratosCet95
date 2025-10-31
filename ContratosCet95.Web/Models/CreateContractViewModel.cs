@@ -1,4 +1,4 @@
-﻿using ContratosCet95.Web.Data.Entities;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
@@ -10,13 +10,13 @@ public class CreateContractViewModel
     public string Name { get; set; } = null!;
 
     [Range(1, int.MaxValue, ErrorMessage = "You must select a Player")]
-    public int PlayerId { get; set; }
+    public int JogadorId { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "You must select a Team")]
-    public int TeamId { get; set; }
+    public int EquipaId { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "You must select a Contract Type")]
-    public int TypeId { get; set; } 
+    public int TipoContratoId { get; set; }
 
     [Required]
     [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
@@ -29,7 +29,11 @@ public class CreateContractViewModel
     [Required]
     public string Conditions { get; set; } = null!;
 
-    public IEnumerable<SelectListItem> Types { get; set; } = null!;
-    public IEnumerable<SelectListItem> Players { get; set; } = null!;
-    public IEnumerable<SelectListItem> Teams { get; set; } = null!;
+
+    [BindNever]
+    public string? StatusMessage { get; set; }
+
+    public IEnumerable<SelectListItem>? Types { get; set; } 
+    public IEnumerable<SelectListItem>? Players { get; set; } 
+    public IEnumerable<SelectListItem>? Teams { get; set; } 
 }
