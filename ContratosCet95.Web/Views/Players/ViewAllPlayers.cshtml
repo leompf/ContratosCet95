@@ -1,0 +1,130 @@
+﻿@model ContratosCet95.Web.Models.PlayerListViewModel
+
+@{
+    ViewData["Title"] = "ViewAllPlayers";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<section id="main" class="container">
+    <header class="major">
+        <h2 style="color: white">All Players</h2>
+        <p style="color: white">Manage and view all players</p>
+    </header>
+
+    <div class="box mb-4">
+        <form id="filterForm" method="get" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" asp-for="NameFilter" placeholder="Name" value="@Model.NameFilter" class="alpha-input" />
+            </div>
+            <div class="col-md-3">
+                <input type="date" asp-for="BirthdateFilter" value="@Model.BirthdateFilter" class="alpha-input" />
+            </div>
+            <div class="col-md-3 d-flex flex-wrap gap-2" style="margin-top: 20px">
+                <input type="submit" value="Filter" class="button primary" />
+                <a asp-action="ViewAllPlayers" class="button alt">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="box">
+        <table class="table-wrapper">
+            <thead>
+                <tr>
+                    <th><a href="#" class="sortable" data-sort="Name"><span>Name</span> <i class="sort-icon"></i></a></th>
+                    <th><a href="#" class="sortable" data-sort="Birthdate"><span>Birthdate</span> <i class="sort-icon"></i></a></th>
+                </tr>
+            </thead>
+            <tbody id="teams-table-body">
+                @await Html.PartialAsync("_ViewAllPlayersTable", Model.Players)
+            </tbody>
+        </table>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let currentSortColumn = '@ViewBag.DefaultSortColumn';
+            let currentSortState = '@(ViewBag.DefaultSortDescending ? "desc" : "asc")';
+            let typingTimer;
+            const debounceDelay = 0;
+
+            function updateSortIcons() {
+                $(".sortable").each(function () {
+                    const col = $(this).data("sort");
+                    const icon = $(this).find(".sort-icon");
+
+                    $(this).removeClass("active-sort");
+                    icon.removeClass("fa-sort-up fa-sort-down fa-sort text-muted");
+
+                    if (col === currentSortColumn) {
+                        $(this).addClass("active-sort");
+                        icon.addClass(currentSortState === "asc" ? "fa fa-sort-up" : "fa fa-sort-down");
+                    }
+                    else {
+                        icon.addClass("fa fa-sort text-muted");
+                    }
+                });
+            }
+
+            updateSortIcons();
+
+            function getFilters() {
+                return {
+                    name: $("#NameFilter").val(),
+                    birthdate: $("#BirthdateFilter").val(),
+                };
+            }
+
+            function loadPlayers() {
+                const filters = getFilters();
+                $.ajax({
+                    url: '@Url.Action("ViewAllPlayers", "Players")',
+                    type: 'GET',
+                    data: {
+                        ...filters,
+                        sortBy: currentSortColumn,
+                        sortDescending: currentSortState === "desc"
+                    },
+                    success: function (result) {
+                        $("#teams-table-body").html(result);
+                        updateSortIcons();
+                    },
+                    error: function () {
+                        alert("Erro ao carregar os dados.");
+                    }
+                });
+            }
+
+            $(document).on("click", ".sortable", function (e) {
+                e.preventDefault();
+                const sortBy = $(this).data("sort");
+
+                if (currentSortColumn === sortBy) {
+                    currentSortState = currentSortState === "desc" ? "asc" : "desc";
+                }
+                else
+                {
+                    currentSortColumn = sortBy;
+                    currentSortState = "desc";
+                }
+
+                loadPlayers();
+            });
+
+            $("#NameFilter, #BirthdateFilter").on("keyup", function () {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(loadPlayers, debounceDelay);
+            });
+
+            $("#NameFilter, #BirthdateFilter").on("change", loadPlayers);
+
+            $("form").on("submit", function (e) {
+                e.preventDefault();
+                loadPlayers();
+            });
+        });
+    </script>
+}
+
+

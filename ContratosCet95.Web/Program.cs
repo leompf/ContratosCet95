@@ -49,6 +49,8 @@ public class Program
         builder.Services.AddTransient<Password>();
 
         builder.Services.AddScoped<IJogadorRepository, JogadorRepository>();
+        builder.Services.AddScoped<IEquipaRepository, EquipaRepository>();
+        builder.Services.AddScoped<IContratoRepository, ContratoRepository>();
 
         var app = builder.Build();
 

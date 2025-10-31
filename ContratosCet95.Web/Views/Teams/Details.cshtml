@@ -1,0 +1,70 @@
+﻿@model ContratosCet95.Web.Data.Entities.Equipa
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<section id="main" class="container">
+    <header class="major">
+        <h2 style="color: white">Team Details</h2>
+        <p style="color: white">View detailed information about the selected team</p>
+    </header>
+
+    <div class="box">
+        <h3 class="mb-3" style="color: white">@Model.Name</h3>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label text-light">Team Name:</label>
+                <p class="text-light">@Model.Name</p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label text-light">City:</label>
+                <p class="text-light">@Model.City</p>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Contracts != null && Model.Contracts.Any())
+    {
+        <div class="box mt-4">
+            <h3 style="color: white">Associated Contracts</h3>
+            <table class="table-wrapper">
+                <thead>
+                    <tr>
+                        <th>Contract ID</th>
+                        <th>Client</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var contrato in Model.Contracts)
+                    {
+                        <tr>
+                            <td>@contrato.Id</td>
+                            <td>@contrato.Jogador?.FullName</td>
+                            <td>@contrato.StartDate.ToString("dd-MM-yyyy")</td>
+                            <td>@contrato.EndDate.ToString("dd-MM-yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="box mt-4">
+            <p class="text-light">No contracts are currently associated with this team.</p>
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-action="Index" class="button alt">Back to List</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="button primary">Edit Team</a>
+    </div>
+</section>
+

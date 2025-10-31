@@ -23,5 +23,8 @@ namespace ContratosCet95.Web.Data.Entities
 
         [Required]
         public User User { get; set; } = null!;
+
+
+        public string FullName => $"{FirstName}  {LastName}";
     }
 }

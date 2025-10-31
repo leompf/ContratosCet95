@@ -48,8 +48,20 @@
             <p>What will you do today?</p>
             <ul class="actions special">
                 <li><a asp-controller="Account" asp-action="ManageUsers" class="button primary">Manage Users</a></li>
-                <li><a href="#" class="button primary">View Teams & Contracts</a></li>
+                <li><a asp-controller="Players" asp-action="Index" class="button primary">Manage Players</a></li>
+                <li><a asp-controller="Teams" asp-action="Index" class="button primary">Manage Teams</a></li>                
             </ul>
         </section>
     }
+}
+
+@if (User.Identity.IsAuthenticated && User.IsInRole("Funcionário"))
+{
+    <section class="box special">
+        <h2>Hello, <a asp-controller="Account" asp-action="Profile">@userLogged.FirstName</a></h2>
+        <p>What will you do today?</p>
+        <ul class="actions special">
+            <li><a asp-controller="Contracts" asp-action="Index" class="button primary">Manage Contracts</a></li>
+        </ul>
+    </section>
 }

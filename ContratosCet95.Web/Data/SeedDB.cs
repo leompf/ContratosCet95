@@ -53,5 +53,22 @@ public class SeedDB
         {
             await _userHelper.AddUserToRoleAsync(user, "Admin");
         }
+
+        if (!_context.TiposContratos.Any())
+        {
+            AddContractTypes("Trimestral");
+            AddContractTypes("Semestral");
+            AddContractTypes("Anual");
+            AddContractTypes("Permanente");
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    private void AddContractTypes(string type)
+    {
+        _context.TiposContratos.Add(new TipoContrato
+        {
+            Type = type,
+        });
     }
 }

@@ -1,0 +1,9 @@
+﻿@model IEnumerable<ContratosCet95.Web.Data.Entities.Jogador>
+
+@foreach (var player in Model)
+{
+    <tr>
+        <td>@player.FullName</td>
+        <td>@player.Birthdate</td>
+    </tr>
+}

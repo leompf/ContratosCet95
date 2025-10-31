@@ -1,0 +1,92 @@
+﻿@model ContratosCet95.Web.Models.CreateContractViewModel
+
+@{
+    ViewData["Title"] = "Create Contract";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<section class="box">
+    <h3>Create a new contract</h3>
+
+    <form method="post">
+        <div class="row gtr-uniform gtr-25 ">
+            <div class="col-12">
+                <h4><label asp-for="Name">Contract Name</label></h4>
+                <input asp-for="Name" type="text" style="width:50%; margin-top:-10px;" />
+                <span asp-validation-for="Name"></span>
+            </div>
+
+            <div class="col-6">
+                <h4><label asp-for="PlayerId">Player</label></h4>
+                <select asp-for="PlayerId" asp-items="Model.Players" style="margin-top: -10px"></select>
+                <span asp-validation-for="PlayerId"></span>
+            </div>
+
+            <div class="col-6">
+                <h4><label asp-for="TeamId">Team</label></h4>
+                <select asp-for="TeamId" asp-items="Model.Teams" style="margin-top: -10px"></select>
+                <span asp-validation-for="TeamId"></span>
+            </div>
+
+            <div class="col-4">
+                <h4><label asp-for="TypeId">Type of Contract</label></h4>
+                <select asp-for="TypeId" asp-items="Model.Types" style="margin-top: -10px"></select>
+                <span asp-validation-for="TypeId"></span>
+            </div>
+
+            <div class="col-4" style="text-align: center">
+                <h4><label asp-for="StartDate">Start Date</label></h4>
+                <input type="date" asp-for="StartDate" style="margin-top: -10px" />
+                <span asp-validation-for="StartDate"></span>
+            </div>
+
+            <div class="col-4">
+                <h4><label asp-for="EndDate">End Date</label></h4>
+                <input type="date" asp-for="EndDate" style="margin-top: -10px" />
+                <span asp-validation-for="EndDate"></span>
+            </div>
+
+            <div class="col-12">
+                <h4><label asp-for="Conditions">Conditions</label></h4>
+                <textarea id="mytextarea" style="margin-top: -10px"></textarea>
+            </div>
+
+            <div class="col-12">
+                <input type="submit" value="Create Contract" class="button" style="margin-top: 4px" />
+            </div>
+        </div>
+        <div asp-validation-summary="All"></div>
+    </form>
+</section>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <!-- Place the first <script> tag in your HTML's <head> -->
+    <script src="https://cdn.tiny.cloud/1/ycrvizocq0mjp6nn87bfgj34q3grbnzs835ajxgutnz656zt/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+
+    <!-- Place the following <script> and <textarea> tags your HTML's <body> -->
+    <script>
+        tinymce.init({
+          selector: 'textarea',
+          plugins: [
+            // Core editing features
+            'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+            // Your account includes a free trial of TinyMCE premium features
+            // Try the most popular premium features until Nov 14, 2025:
+            'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'advtemplate', 'ai', 'uploadcare', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown','importword', 'exportword', 'exportpdf'
+          ],
+          toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography uploadcare | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+          tinycomments_mode: 'embedded',
+          tinycomments_author: 'Author name',
+          mergetags_list: [
+            { value: 'First.Name', title: 'First Name' },
+            { value: 'Email', title: 'Email' },
+          ],
+          ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
+          uploadcare_public_key: 'ycrvizocq0mjp6nn87bfgj34q3grbnzs835ajxgutnz656zt',
+        });
+    </script>
+}
+

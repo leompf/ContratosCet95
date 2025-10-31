@@ -1,0 +1,51 @@
+﻿@model ContratosCet95.Web.Models.CreateTeamViewModel
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<section class="box">
+    <h3>Create a new Team</h3>
+
+    @if (!string.IsNullOrEmpty(Model?.StatusMessage))
+    {
+        <div>@Model.StatusMessage</div>
+
+        <script>
+            setTimeout(function() {
+                window.location.href = '@Url.Action("Index", "Teams")';
+            }, 3000);
+        </script>
+    }
+
+    <form method="post">
+        <div class="row">
+            <div class="col-6">
+                <h4><label asp-for="Name">Team Name</label></h4>
+                <input asp-for="Name" type="text" style="margin-top:-10px;" />
+                <span asp-validation-for="Name"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6" style="margin-top: 10px">
+                <h4><label asp-for="City">City</label></h4>
+                <input asp-for="City" type="text" style="margin-top:-10px;" />
+                <span asp-validation-for="City"></span>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <input type="submit" value="Create Team" class="button" style="margin-top: 20px" />
+        </div>
+        <div asp-validation-summary="All"></div>
+    </form>
+</section>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

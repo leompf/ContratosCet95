@@ -1,0 +1,64 @@
+﻿@model ContratosCet95.Web.Models.CreateTeamViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<section id="main" class="container">
+    <header class="major">
+        <h2 style="color: white">Edit Team</h2>
+        <p style="color: white">Modify the details of the selected team</p>
+    </header>
+
+    <div class="box">
+        <form asp-action="Edit" method="post" class="row g-3">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="Id" />
+
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label text-light">Team Name</label>
+                <input asp-for="Name" class="alpha-input" placeholder="Enter team name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="City" class="form-label text-light">City</label>
+                <input asp-for="City" class="alpha-input" placeholder="Enter city" />
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.StatusMessage))
+            {
+                <div class="col-12 mt-3">
+                    <div class="alert alert-success">
+                        @Model.StatusMessage
+                    </div>
+                </div>
+            }
+
+            <div class="col-12 mt-4 d-flex flex-wrap gap-2">
+                <button type="submit" class="button primary">Save Changes</button>
+                <a asp-action="Details" asp-route-id="@Model.Id" class="button alt">Cancel</a>
+                <a asp-action="Index" class="button alt">Back to List</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            const statusMessage = "@Model.StatusMessage";
+            if (statusMessage && statusMessage.length > 0) {
+                setTimeout(() => {
+                    window.location.href = '@Url.Action("Index", "Teams")';
+                }, 2000);
+            }
+        });
+    </script>
+}
+

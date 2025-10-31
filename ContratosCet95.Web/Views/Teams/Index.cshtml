@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<section class="box">
+    <h3>Manage Teams</h3>
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div class="row gtr-0">
+
+        <div class="col-3">
+            <a asp-action="ViewAllTeams" class="button primary">View All Teams</a>
+        </div>
+
+        <div class="col-3">
+            <a asp-action="Create" class="button primary">Create a new Team</a>
+        </div>
+    </div>
+</section>
+

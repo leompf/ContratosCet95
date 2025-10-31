@@ -1,0 +1,179 @@
+﻿@model ContratosCet95.Web.Models.TeamListViewModel
+
+@{
+    ViewData["Title"] = "ViewAllTeams";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<section id="main" class="container">
+    <header class="major">
+        <h2 style="color: white">All Teams</h2>
+        <p style="color: white">Manage and view all teams</p>
+    </header>
+
+    <div class="box mb-4">
+        <form id="filterForm" method="get" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" asp-for="NameFilter" placeholder="Name" value="@Model.NameFilter" class="alpha-input" />
+            </div>
+            <div class="col-md-3">
+                <input type="text" asp-for="CityFilter" placeholder="City" value="@Model.CityFilter" class="alpha-input" />
+            </div>
+            <div class="col-md-3 d-flex flex-wrap gap-2">
+                <input type="submit" value="Filter" class="button primary" />
+                <a asp-action="ViewAllTeams" class="button alt">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="box">
+        <table class="table-wrapper">
+            <thead>
+                <tr>
+                    <th><a href="#" class="sortable" data-sort="Name"><span>Name</span> <i class="sort-icon"></i></a></th>
+                    <th><a href="#" class="sortable" data-sort="City"><span>City</span> <i class="sort-icon"></i></a></th>
+                    <th><a><span>Actions</span></a></th>
+                </tr>
+            </thead>
+            <tbody id="teams-table-body">
+                @await Html.PartialAsync("_ViewAllTeamsTable", Model.Teams)
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div id="deleteModal" class="modal" style="display:none;">
+    <div class="modal-content box" style="max-width: 400px; margin: auto;">
+        <h3>Confirm Delete</h3>
+        <p>Are you sure you want to delete this team?</p>
+        <div class="actions" style="display:flex; justify-content: space-between; margin-top:20px;">
+            <button id="confirmDelete" class="button primary">Yes, delete</button>
+            <button id="cancelDelete" class="button alt">Cancel</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let currentSortColumn = '@ViewBag.DefaultSortColumn';
+            let currentSortState = '@(ViewBag.DefaultSortDescending ? "desc" : "asc")';
+            let typingTimer;
+            const debounceDelay = 0;
+
+            function updateSortIcons() {
+                $(".sortable").each(function () {
+                    const col = $(this).data("sort");
+                    const icon = $(this).find(".sort-icon");
+
+                    $(this).removeClass("active-sort");
+                    icon.removeClass("fa-sort-up fa-sort-down fa-sort text-muted");
+
+                    if (col === currentSortColumn) {
+                        $(this).addClass("active-sort");
+                        icon.addClass(currentSortState === "asc" ? "fa fa-sort-up" : "fa fa-sort-down");
+                    }
+                    else {
+                        icon.addClass("fa fa-sort text-muted");
+                    }
+                });
+            }
+
+            updateSortIcons();
+
+            function getFilters() {
+                return {
+                    name: $("#NameFilter").val(),
+                    city: $("#CityFilter").val(),
+                };
+            }
+
+            function loadTeams() {
+                const filters = getFilters();
+                $.ajax({
+                    url: '@Url.Action("ViewAllTeams", "Teams")',
+                    type: 'GET',
+                    data: {
+                        ...filters,
+                        sortBy: currentSortColumn,
+                        sortDescending: currentSortState === "desc"
+                    },
+                    success: function (result) {
+                        $("#teams-table-body").html(result);
+                        updateSortIcons();
+                    },
+                    error: function () {
+                        alert("Erro ao carregar os dados.");
+                    }
+                });
+            }
+
+            $(document).on("click", ".sortable", function (e) {
+                e.preventDefault();
+                const sortBy = $(this).data("sort");
+
+                if (currentSortColumn === sortBy) {
+                    currentSortState = currentSortState === "desc" ? "asc" : "desc";
+                }
+                else
+                {
+                    currentSortColumn = sortBy;
+                    currentSortState = "desc";
+                }
+
+                loadTeams();
+            });
+
+            $("#NameFilter, #CityFilter").on("keyup", function () {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(loadTeams, debounceDelay);
+            });
+
+            $("#NameFilter, #CityFilter").on("change", loadTeams);
+
+            $("form").on("submit", function (e) {
+                e.preventDefault();
+                loadTeams();
+            });
+
+            let selectedTeamId = null;
+
+            // Show modal
+            $(document).on('click', '.btn-delete', function () {
+                selectedTeamId = $(this).data('id');
+                $("#deleteModal").fadeIn(200);
+            });
+
+            // Cancel delete
+            $("#cancelDelete").on('click', function () {
+                selectedTeamId = null;
+                $("#deleteModal").fadeOut(200);
+            });
+
+            // Confirm delete
+            $("#confirmDelete").on('click', function () {
+                if (!selectedTeamId) return;
+
+                $.ajax({
+                    url: '@Url.Action("Delete", "Teams")/' + selectedTeamId,
+                    type: 'POST',
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function () {
+                        $('tr[data-team-id="' + selectedTeamId + '"]').fadeOut(300, function () {
+                            $(this).remove();
+                        });
+                        $("#deleteModal").fadeOut(200);
+                    },
+                    error: function () {
+                        alert("An error occurred while deleting the team.");
+                        $("#deleteModal").fadeOut(200);
+                    }
+                });
+            });
+        });
+    </script>
+    @Html.AntiForgeryToken()
+}
+

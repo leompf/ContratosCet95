@@ -4,6 +4,7 @@ using ContratosCet95.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContratosCet95.Web.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20251027195748_AddEntities-Equipa-Contrato")]
+    partial class AddEntitiesEquipaContrato
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,10 +32,6 @@ namespace ContratosCet95.Web.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Conditions")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
@@ -52,16 +51,11 @@ namespace ContratosCet95.Web.Migrations
                     b.Property<int>("TeamId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TypeId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EquipaId");
 
                     b.HasIndex("JogadorId");
-
-                    b.HasIndex("TypeId");
 
                     b.ToTable("Contratos");
                 });
@@ -114,23 +108,6 @@ namespace ContratosCet95.Web.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Jogadores");
-                });
-
-            modelBuilder.Entity("ContratosCet95.Web.Data.Entities.TipoContrato", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TiposContratos");
                 });
 
             modelBuilder.Entity("ContratosCet95.Web.Data.Entities.User", b =>
@@ -359,17 +336,9 @@ namespace ContratosCet95.Web.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContratosCet95.Web.Data.Entities.TipoContrato", "Type")
-                        .WithMany()
-                        .HasForeignKey("TypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Equipa");
 
                     b.Navigation("Jogador");
-
-                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("ContratosCet95.Web.Data.Entities.Jogador", b =>
